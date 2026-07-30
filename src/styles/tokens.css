@@ -1,0 +1,26 @@
+:root {
+  /* Marca */
+  --color-brand: #242C4F;
+  --color-accent: #37BBED;
+  /* Superficies */
+  --color-bg: #F5F6F8;
+  --color-panel: #FFFFFF;
+  --color-border: #E5E7EB;
+  --color-border-soft: #F3F4F6;
+  /* Texto */
+  --text-strong: #111827;
+  --text-medium: #374151;
+  --text-soft: #6B7280;
+  --text-faint: #9CA3AF;
+  /* Espaciado */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-7: 28px; --sp-8: 32px;
+  /* Radios / sombras */
+  --radius: 6px;
+  --radius-sm: 4px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  /* Layout */
+  --max-width: 1100px;
+  --header-h: 56px;
+  --font-sans: "Encode Sans", system-ui, -apple-system, sans-serif;
+}

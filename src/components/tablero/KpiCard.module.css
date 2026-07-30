@@ -1,0 +1,54 @@
+.card {
+  background: transparent;
+  border: none;
+  padding: 16px 24px 14px;
+  cursor: pointer;
+  text-align: left;
+  flex: 1 1 0;
+  min-width: 80px;
+  transition: background 0.12s;
+  position: relative;
+  font-family: inherit;
+}
+
+.divider {
+  border-left: 1px solid var(--color-border);
+}
+
+.activo {
+  background: #FAFAFA;
+}
+
+.indicador {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 2px 2px 0 0;
+}
+
+.numero {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.skeleton {
+  display: inline-block;
+  width: 40px;
+  height: 24px;
+  border-radius: 4px;
+  background: var(--color-border-soft);
+  vertical-align: middle;
+}
+
+.label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}

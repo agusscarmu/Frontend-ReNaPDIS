@@ -1,9 +1,0 @@
-.card {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  background: var(--color-panel);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-}

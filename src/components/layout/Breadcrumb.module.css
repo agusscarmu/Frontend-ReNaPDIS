@@ -1,7 +1,0 @@
-.crumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-soft); margin-bottom: var(--sp-5); }
-.home { color: var(--text-medium); display: inline-flex; }
-.item { display: inline-flex; align-items: center; gap: 6px; }
-.sep { color: var(--text-faint); }
-.link { background: none; border: none; padding: 0; cursor: pointer; color: var(--text-medium); font-weight: 500; }
-.link:hover { color: var(--color-accent); }
-.current { color: var(--color-accent); font-weight: 600; }

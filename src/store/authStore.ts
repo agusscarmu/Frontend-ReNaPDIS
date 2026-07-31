@@ -1,52 +1,69 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { setToken } from '@/api/token';
+import * as authApi from '@/api/auth.api';
+import type { SessionStatus } from '@/types/auth.types';
 
 export interface AuthUser {
   nombre: string;
   iniciales: string;
-  email: string;
 }
 
 interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  sessionStatus: SessionStatus | null;
+  bootstrapped: boolean;
+  login: (username: string, password: string) => Promise<SessionStatus>;
+  verifyTotp: (code: string) => Promise<void>;
+  logout: () => Promise<void>;
+  bootstrap: () => Promise<void>;
 }
 
 function iniciales(nombre: string): string {
   return nombre
-    .split(' ')
+    .split(/[\s._-]+/)
     .filter(Boolean)
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase())
     .join('');
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      isAuthenticated: false,
-      login: async (email: string, _password: string) => {
-        // Sin backend de auth todavía: se simula el login y se guarda un token en memoria.
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        const nombre = email.split('@')[0] ?? 'Usuario';
-        setToken('mock-token');
-        set({
-          user: { nombre, iniciales: iniciales(nombre), email },
-          isAuthenticated: true,
-        });
-      },
-      logout: () => {
-        setToken(null);
-        set({ user: null, isAuthenticated: false });
-      },
-    }),
-    {
-      name: 'renapdis.auth',
-      storage: createJSONStorage(() => sessionStorage),
+function aUsuario(username: string): AuthUser {
+  return { nombre: username, iniciales: iniciales(username) };
+}
+
+export const useAuthStore = create<AuthState>()((set) => ({
+  user: null,
+  isAuthenticated: false,
+  sessionStatus: null,
+  bootstrapped: false,
+
+  login: async (username, password) => {
+    const { sessionStatus } = await authApi.login(username, password);
+    set({ sessionStatus, isAuthenticated: false, user: null });
+    return sessionStatus;
+  },
+
+  verifyTotp: async (code) => {
+    const { username } = await authApi.verifyTotp(code);
+    set({ user: aUsuario(username), isAuthenticated: true, sessionStatus: 'AUTHENTICATED' });
+  },
+
+  logout: async () => {
+    try {
+      await authApi.logout();
+    } finally {
+      set({ user: null, isAuthenticated: false, sessionStatus: null });
     }
-  )
-);
+  },
+
+  bootstrap: async () => {
+    try {
+      const { username } = await authApi.getMe();
+      set({ user: aUsuario(username), isAuthenticated: true, sessionStatus: 'AUTHENTICATED' });
+    } catch {
+      set({ user: null, isAuthenticated: false, sessionStatus: null });
+    } finally {
+      set({ bootstrapped: true });
+    }
+  },
+}));

@@ -31,8 +31,8 @@ export default function Header() {
     { label: 'Reportes', activo: false, onClick: null as (() => void) | null },
   ];
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 

@@ -11,13 +11,10 @@ test('redirige a login cuando no hay sesión y la página no tiene violaciones d
   expect(results.violations).toEqual([]);
 });
 
-test('permite iniciar sesión y ver el tablero de trámites', async ({ page }) => {
+test('el formulario de credenciales muestra usuario y contraseña', async ({ page }) => {
   await page.goto('/login');
 
-  await page.getByLabel('Email').fill('usuaria@renapdis.gob.ar');
-  await page.getByLabel('Contraseña').fill('demo1234');
-  await page.getByRole('button', { name: 'Ingresar' }).click();
-
-  await expect(page).toHaveURL('/');
-  await expect(page.getByRole('heading', { name: 'Trámites' })).toBeVisible();
+  await expect(page.getByLabel('Usuario')).toBeVisible();
+  await expect(page.getByLabel('Contraseña')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Ingresar' })).toBeVisible();
 });

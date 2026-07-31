@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
+import { http, HttpResponse } from 'msw';
 import { server } from '@/mocks/server';
 import { authHandlers } from '@/mocks/auth.handlers';
 import { useAuthStore } from '@/store/authStore';
@@ -63,5 +64,33 @@ describe('Login', () => {
     await userEvent.type(codigo, '123456');
     await userEvent.click(screen.getByRole('button', { name: 'Verificar' }));
     await waitFor(() => expect(useAuthStore.getState().isAuthenticated).toBe(true));
+  });
+
+  it('código inválido muestra error', async () => {
+    server.use(...authHandlers);
+    renderLogin();
+    await userEvent.type(screen.getByLabelText('Usuario'), 'tester');
+    await userEvent.type(screen.getByLabelText('Contraseña'), 'ok');
+    await userEvent.click(screen.getByRole('button', { name: 'Ingresar' }));
+    const codigo = await screen.findByLabelText('Código de verificación');
+    await userEvent.type(codigo, '000000');
+    await userEvent.click(screen.getByRole('button', { name: 'Verificar' }));
+    expect(await screen.findByText('Código inválido')).toBeInTheDocument();
+  });
+
+  it('sesión expirada vuelve al paso de credenciales', async () => {
+    server.use(...authHandlers);
+    renderLogin();
+    await userEvent.type(screen.getByLabelText('Usuario'), 'tester');
+    await userEvent.type(screen.getByLabelText('Contraseña'), 'ok');
+    await userEvent.click(screen.getByRole('button', { name: 'Ingresar' }));
+    const codigo = await screen.findByLabelText('Código de verificación');
+
+    server.use(http.post('/api/auth/2fa/verify', () => new HttpResponse(null, { status: 403 })));
+
+    await userEvent.type(codigo, '123456');
+    await userEvent.click(screen.getByRole('button', { name: 'Verificar' }));
+    expect(await screen.findByText('La sesión expiró. Volvé a ingresar.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Usuario')).toBeInTheDocument();
   });
 });

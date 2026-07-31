@@ -73,6 +73,8 @@ export default function Login() {
       else if (code === 403) {
         setError('La sesión expiró. Volvé a ingresar.');
         setPaso('credenciales');
+        codForm.reset();
+        setSetup(null);
       } else setError('No se pudo verificar el código. Intentá nuevamente.');
     }
   };

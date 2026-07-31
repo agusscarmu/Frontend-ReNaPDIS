@@ -8,23 +8,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const useMsw = env.VITE_USE_MSW === 'true';
 
   return {
     plugins: [react()],
     resolve: {
       alias: { '@': path.resolve(__dirname, 'src') },
     },
-    server: useMsw
-      ? undefined
-      : {
-          proxy: {
-            '/api': {
-              target: env.VITE_BACKEND_URL || 'http://localhost:8080',
-              changeOrigin: true,
-            },
-          },
+    server: {
+      proxy: {
+        '/api': {
+          target: env.VITE_BACKEND_URL || 'http://localhost:8080',
+          changeOrigin: true,
         },
+      },
+    },
     test: {
       environment: 'jsdom',
       setupFiles: ['./src/setupTests.ts'],

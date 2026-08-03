@@ -1,0 +1,62 @@
+# Frontend: Deployment + Service + Route.
+# La imagen se resuelve automáticamente desde el ImageStream "renapdis-frontend:latest"
+# vía el trigger de OpenShift (build por Dockerfile, ver Dockerfile en la raíz).
+# A diferencia del backend, no hay ConfigMap/Secret: la config (VITE_API_BASE_URL)
+# ya quedó horneada en el bundle estático en build-time.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: renapdis-frontend
+  labels: { app: renapdis, component: frontend }
+  annotations:
+    image.openshift.io/triggers: |
+      [{"from":{"kind":"ImageStreamTag","name":"renapdis-frontend:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"frontend\")].image"}]
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: renapdis, component: frontend }
+  template:
+    metadata:
+      labels: { app: renapdis, component: frontend }
+    spec:
+      containers:
+        - name: frontend
+          image: renapdis-frontend:latest   # placeholder; el trigger lo reescribe al ref interno
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet: { path: /, port: 8080 }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /, port: 8080 }
+            periodSeconds: 15
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { cpu: 250m, memory: 128Mi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: renapdis-frontend
+  labels: { app: renapdis, component: frontend }
+spec:
+  selector: { app: renapdis, component: frontend }
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: renapdis-frontend
+  labels: { app: renapdis, component: frontend }
+spec:
+  to:
+    kind: Service
+    name: renapdis-frontend
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

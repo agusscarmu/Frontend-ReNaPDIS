@@ -6,6 +6,7 @@
 // untrusted (e.g. user-uploaded) spreadsheet files.
 import * as XLSX from 'xlsx';
 import { obtenerExpediente } from '@/api/expedientes.api';
+import { COLUMNAS_AGENDA } from '@/components/tablero/columnas.config';
 import type { ColumnaTabla, Expediente, ExpedienteResumen } from '@/types/expediente.types';
 
 const siNo = (v: unknown) => (v ? 'Sí' : 'No');
@@ -82,7 +83,7 @@ export async function exportarExpedientesExcel(
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, hojaDesdeColumnas(expedientes, columnas), 'Trámites');
-  XLSX.utils.book_append_sheet(wb, hojaDesdeColumnas(expedientes, columnas), 'Agenda');
+  XLSX.utils.book_append_sheet(wb, hojaDesdeColumnas(expedientes, COLUMNAS_AGENDA), 'Agenda');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detalles.map(filaPlataforma)), 'Plataforma');
 
   const fecha = new Date().toISOString().slice(0, 10);

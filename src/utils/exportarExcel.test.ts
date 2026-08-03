@@ -205,7 +205,30 @@ describe('exportarExpedientesExcel', () => {
     expect(writeFileMock).toHaveBeenCalledTimes(1);
     const [wb, nombreArchivo] = writeFileMock.mock.calls[0];
     expect(wb.SheetNames).toEqual(['Trámites', 'Agenda', 'Plataforma']);
-    expect(XLSX.utils.sheet_to_json(wb.Sheets['Trámites'])).toEqual(XLSX.utils.sheet_to_json(wb.Sheets['Agenda']));
+    expect(XLSX.utils.sheet_to_json(wb.Sheets['Trámites'])).toEqual([
+      { Expediente: 'EX-1', Entidad: 'Hospital Test' },
+      { Expediente: 'EX-2', Entidad: 'Hospital Test' },
+    ]);
+    expect(XLSX.utils.sheet_to_json(wb.Sheets['Agenda'])).toEqual([
+      expect.objectContaining({
+        Expediente: 'EX-1',
+        Entidad: 'Hospital Test',
+        CUIT: '30-11111111-1',
+        Naturaleza: 'Pública',
+        Provincia: 'Buenos Aires',
+        Departamento: 'Sistemas',
+        Contacto: 'Juan López',
+        Función: 'Director técnico',
+        'CUIT/CUIL contacto': '20-22222222-2',
+        Teléfono: '11-2222-3333',
+        Email: 'contacto@hospital.test',
+        'Referente técnico': 'Marta Ruiz',
+        'Referente = solicitante': 'Sí',
+        Responsable: 'Ana Pérez',
+        Estado: 'Aprobado',
+      }),
+      expect.objectContaining({ Expediente: 'EX-2' }),
+    ]);
     expect(XLSX.utils.sheet_to_json(wb.Sheets['Plataforma'])).toHaveLength(2);
     expect(nombreArchivo).toMatch(/^tramites_\d{4}-\d{2}-\d{2}\.xlsx$/);
   });

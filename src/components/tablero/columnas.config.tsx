@@ -49,3 +49,29 @@ export const COLUMNAS_TABLA: ColumnaTabla[] = [
 
 // Keys visibles por defecto (orden del catálogo).
 export const COLUMNAS_DEFAULT_KEYS = COLUMNAS_TABLA.filter((c) => c.defaultVisible).map((c) => c.key);
+
+// Set fijo de columnas para la hoja "Agenda" del export a Excel: los mismos campos que
+// muestra el tab "Agenda" del detalle de expediente (ver TabAgenda.tsx), independiente de
+// qué columnas tenga tildadas el usuario en la tabla del Tablero.
+const CLAVES_AGENDA: ColumnaTabla['key'][] = [
+  'expediente',
+  'nombreEntidad',
+  'cuitEntidad',
+  'naturalezaEntidad',
+  'provincia',
+  'departamento',
+  'contacto',
+  'funcionEnEntidad',
+  'cuitCuilContacto',
+  'telefono',
+  'email',
+  'referenteTecnico',
+  'referenteEsSolicitante',
+  'responsable',
+  'estado',
+  'ultimaModificacion',
+];
+
+export const COLUMNAS_AGENDA: ColumnaTabla[] = CLAVES_AGENDA.map(
+  (key) => COLUMNAS_TABLA.find((c) => c.key === key)!
+);

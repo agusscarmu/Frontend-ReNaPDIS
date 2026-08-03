@@ -1,4 +1,5 @@
-import { exportarExpedientesCsv } from '@/utils/exportarCsv';
+import { useState } from 'react';
+import { exportarExpedientesExcel } from '@/utils/exportarExcel';
 import type { ColumnaTabla, ExpedienteResumen } from '@/types/expediente.types';
 
 interface ExportarExcelButtonProps {
@@ -17,23 +18,39 @@ function IcoDownload() {
 }
 
 export default function ExportarExcelButton({ expedientes, columnas }: ExportarExcelButtonProps) {
-  const disabled = !expedientes || expedientes.length === 0;
+  const [generando, setGenerando] = useState(false);
+  const [fallidos, setFallidos] = useState<number | null>(null);
 
-  const handleClick = () => {
-    if (!expedientes || expedientes.length === 0) return;
-    exportarExpedientesCsv(expedientes, columnas);
+  const sinDatos = !expedientes || expedientes.length === 0;
+  const disabled = sinDatos || generando;
+
+  const handleClick = async () => {
+    if (sinDatos) return;
+    setFallidos(null);
+    setGenerando(true);
+    try {
+      const resultado = await exportarExpedientesExcel(expedientes, columnas);
+      if (resultado.fallidos > 0) setFallidos(resultado.fallidos);
+    } finally {
+      setGenerando(false);
+    }
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      disabled={disabled}
-      title={disabled ? 'No hay trámites para exportar' : 'Descargar los trámites filtrados en Excel'}
-      className="inline-flex items-center gap-2 whitespace-nowrap rounded-sm border border-surface-border bg-surface-panel px-3.5 py-2.5 text-[13px] font-medium text-ink-medium hover:border-accent hover:text-ink-strong disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-surface-border disabled:hover:text-ink-medium"
-    >
-      <IcoDownload />
-      Exportar Excel
-    </button>
+    <div className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={disabled}
+        title={sinDatos ? 'No hay trámites para exportar' : 'Descargar los trámites filtrados en Excel'}
+        className="inline-flex items-center gap-2 whitespace-nowrap rounded-sm border border-surface-border bg-surface-panel px-3.5 py-2.5 text-[13px] font-medium text-ink-medium hover:border-accent hover:text-ink-strong disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-surface-border disabled:hover:text-ink-medium"
+      >
+        <IcoDownload />
+        {generando ? 'Generando...' : 'Exportar Excel'}
+      </button>
+      {fallidos !== null && fallidos > 0 && (
+        <p className="text-xs text-red-600">{fallidos} registro(s) no se pudieron incluir en el detalle de Plataforma.</p>
+      )}
+    </div>
   );
 }

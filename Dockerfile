@@ -11,7 +11,11 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 # Vite inyecta las env VITE_* en BUILD-TIME (no en runtime como el backend con
-# Spring). Para un ambiente cross-site pasá el host real del backend:
+# Spring). Front y back en el mismo namespace de OpenShift (caso estándar): NO
+# pasar este build-arg (o pasarlo vacío) — el cliente cae a '/api' relativo,
+# resuelto por el location ^~ /api/ de nginx.conf (proxy interno al Service
+# renapdis-backend, sin problemas de certificado del lado del browser).
+# Sólo hace falta setearlo si el back vive fuera de este cluster/namespace:
 #   oc start-build renapdis-frontend --from-dir=. \
 #     --build-arg=VITE_API_BASE_URL=https://backend-host/api --follow
 ARG VITE_API_BASE_URL

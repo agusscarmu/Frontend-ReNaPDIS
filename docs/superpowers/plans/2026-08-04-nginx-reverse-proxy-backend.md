@@ -52,12 +52,21 @@ server {
     # le gana a este por extensión de archivo (ej. /api/x/avatar.png caería ahí
     # en vez de proxearse, porque nginx prioriza location regex sobre location
     # de prefijo salvo que este último use ^~).
+    #
+    # proxy_pass estático (no por variable): nginx resuelve el hostname del
+    # Service una sola vez, al arrancar. Tradeoff aceptado: si el Service
+    # `renapdis-backend` no resuelve justo en ese instante, nginx no arranca
+    # (cae todo el front, no sólo /api). Riesgo bajo acá porque el Service se
+    # crea junto con el Deployment del back en el mismo manifiesto.
     location ^~ /api/ {
         proxy_pass http://renapdis-backend:8080;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        # Hardcodeado: la Route del front hace terminación TLS edge y
+        # redirige HTTP->HTTPS, así que toda request que llega acá ya fue
+        # HTTPS del lado del cliente ($scheme acá adentro siempre da "http").
+        proxy_set_header X-Forwarded-Proto https;
     }
 
     location / {
